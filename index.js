@@ -17,35 +17,11 @@ app.use(morgan(function (tokens,req,res) {
     tokens.res(req, res, 'content-length'), '-',
     tokens['response-time'](req, res), 'ms'
   ]
-  if (req.method === "POST"){
+  if (req.method === 'POST'){
     result.push(JSON.stringify(req.body))
   }
   return result.join(' ')
 }))
-
-
-let persons = [
-    { 
-      "id": 1,
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": 2,
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": 3,
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": 4,
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-    }
-]
 
 
 app.get('/api/persons', (request, response,next) => {
@@ -56,7 +32,6 @@ app.get('/api/persons', (request, response,next) => {
 
 app.post('/api/persons', (request, response, next) => {
   const body = request.body
-  
   const person = new Person({
     name: body.name,
     number: body.number,
@@ -67,7 +42,7 @@ app.post('/api/persons', (request, response, next) => {
   }).catch((error) => next(error))
 })
 
-app.get('/api/persons/:id', (request, response) => {
+app.get('/api/persons/:id', (request, response, next) => {
   Person.findById(request.params.id)
     .then(person => {
       if (person) {
@@ -81,7 +56,7 @@ app.get('/api/persons/:id', (request, response) => {
 
 app.delete('/api/persons/:id', (request, response, next) => {
   Person.findByIdAndRemove(request.params.id)
-    .then(result => {
+    .then(() => {
       response.status(204).end()
     })
     .catch(error => next(error))
@@ -89,23 +64,22 @@ app.delete('/api/persons/:id', (request, response, next) => {
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
-  const {name,number} = request.body
+  const { name,number } = request.body
 
-  Person.findByIdAndUpdate(request.params.id, {name,number}, {new: true, runValidators: true, context: 'query'})
+  Person.findByIdAndUpdate(request.params.id, { name,number }, { new: true, runValidators: true, context: 'query' })
     .then(updatedPerson => {
-    response.json(updatedPerson)
-  }).catch((error) => next(error))
+      response.json(updatedPerson)
+    }).catch((error) => next(error))
 
 })
 
 
-app.get('/info', (request, response) => {
+app.get('/info', (request, response, next) => {
   Person.count({}).then(result => {
-  const time = new Date()
-  const res = `Phonebook has info for ${result} people <br> ${time}`
-  response.send(res)
+    const time = new Date()
+    const res = `Phonebook has info for ${result} people <br> ${time}`
+    response.send(res)
   }).catch((error) => next(error))
-  
 })
 
 const PORT = process.env.PORT || 3001
